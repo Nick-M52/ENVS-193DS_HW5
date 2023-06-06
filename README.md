@@ -8,12 +8,32 @@
 
 The files used to create this data analysis are the csv file of the field data, scratch code, and final code. Both code files use the same data csv file from Harvard. The scratch code was used to create the code for analysis and the final code is what will be referenced for the results.
 
-Data-
+## Data-
 
 The data is available [here](https://portal.edirepository.org/nis/mapbrowse?packageid=knb-lter-hfr.109.18).
 
 Ellison, A. and E. Farnsworth. 2021. Effects of Prey Availability on Sarracenia Physiology at Harvard Forest 2005 ver 18. Environmental Data Initiative. <https://doi.org/10.6073/pasta/26b22d09279e62fd729ffc35f9ef0174> (Accessed 2023-06-06).
 
-Code-
+Data types in this set:
 
-The github repository for this project is available [here](https://github.com/Nick-M52/ENVS-193DS_HW5/tree/main).
+-   gram
+
+-   cm^2^
+
+-   cm^2^ /g
+
+-   mg/g
+
+-   g/m^2^
+
+-   nmol/g/s
+
+-   mmol/mol/s
+
+-   number
+
+NA is used to record missing data, these data were removed in the code for the purpose of statistical analysis.
+
+### Code- 
+
+The github repository, containing all the code and data for this project, is available [here](https://github.com/Nick-M52/ENVS-193DS_HW5/tree/main).
