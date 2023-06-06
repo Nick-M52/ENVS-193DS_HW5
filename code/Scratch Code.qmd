@@ -16,7 +16,7 @@ editor_options:
 ## Homework 5 Code
 
 ```{r}
-install.packages("car")
+#install.packages("car")
 ```
 
 

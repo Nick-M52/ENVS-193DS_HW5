@@ -1,0 +1,202 @@
+---
+title: "HW5_code"
+format: 
+  html:
+    toc: true
+    toc-location: left
+    code-fold: true
+    theme: yeti
+execute: 
+  message: false
+  warning: false
+editor_options: 
+  chunk_output_type: console
+---
+
+## Homework 5 Code
+
+```{r}
+#install.packages("car")
+```
+
+
+```{r}
+library(tidyverse)
+library(here)
+library(janitor)
+library(ggeffects)
+library(performance)
+library(naniar) # or equivalent
+library(flextable) # or equivalent
+library(car)
+library(broom)
+```
+
+```{r}
+#install.packages("corrplot")
+#install.packages("AICcmodavg")
+#install.packages("GGally")
+```
+
+```{r}
+library(corrplot)
+library(AICcmodavg)
+library(GGally)
+```
+
+
+```{r}
+#reading in data table
+plant<- read_csv(here("data", "knb-lter-hfr.109.18", "hf109-01-sarracenia.csv")) %>%
+  #making the column names cleaner
+  clean_names() %>% 
+  select(totmass, species, feedlevel, sla, chlorophyll, amass, num_lvs, num_phylls)
+
+head(plant)
+```
+
+```{r}
+#missing data visualization
+gg_miss_var(plant)
+
+```
+
+```{r}
+plant_subset<- plant %>% 
+  drop_na(sla, chlorophyll, amass, num_lvs, num_phylls)
+view(plant_subset)
+```
+
+```{r}
+#correlation plot
+#To determine the relationships between numerical variables in our dataset, we calculated Pearsons r and visually represented correlation using a correlation plot.
+# calculate Pearson's r for numerical values only
+library(car)
+plant_cor<-plant_subset %>% 
+  select(feedlevel:num_phylls) %>% 
+  cor(method="pearson")
+
+
+
+
+```
+
+```{r}
+# creating a correlation plot
+corrplot(plant_cor,
+         # change the shape of what's in the cells
+         method = "ellipse",
+         addCoef.col = "black"
+         )
+```
+
+```{r}
+#creating a plot of each variable compared against the others
+plant_subset %>% 
+  select(species:num_phylls) %>% 
+  ggpairs()
+```
+
+```{r}
+#starting regression here
+#To determine how species and physiological characteristics predict biomass, we fit multiple linear models.
+null<- lm(totmass~1, data= plant_subset)
+full <- lm(totmass ~ species + feedlevel + sla + chlorophyll + amass + num_lvs + num_phylls, data = plant_subset)
+```
+
+```{r}
+# Diagnostics
+
+#We visually assess normality and homoskedasticity of residuals using diagnostic plots for the full model
+par(mfrow= c(2,2))
+plot(full)
+```
+
+```{r}
+#testing normality
+check_normality(full)
+check_heteroscedasticity(full)
+
+```
+
+```{r model-logs}
+null_log <- lm(log(totmass) ~ 1, data = plant_subset)
+full_log <- lm(log(totmass) ~ species + feedlevel + sla + chlorophyll + amass + num_lvs + num_phylls, data = plant_subset)
+
+plot(full_log)
+check_normality(full_log)
+check_heteroscedasticity(full_log)
+```
+
+```{r}
+#evaluate multicollinearity
+car:: vif(full_log)
+```
+ 
+ we evaluated multicollinearity by calculating generalized variance inflation factor and determined that
+ 
+ 
+ 
+ Trying some more models:
+ 
+ what set of predictor variables best explains the response
+ 
+```{r}
+#second model
+model2_log<- lm(log(totmass) ~ species, data= plant_subset)
+```
+ 
+```{r}
+#check the plot
+plot(model2_log)
+
+check_normality(model2_log)
+check_heteroscedasticity(model2_log)
+```
+
+compare models using Akaike's Information criterion (AIC) values:
+
+```{r}
+#AIC is useful for comparing 2 or more models. The AIC value comparison can tell us what model is the least complex and best predicts our response. Lowest AIC value means best model
+AICc(full_log)
+AICc(model2_log)
+AICc(null_log)
+```
+
+```{r}
+MuMIn::AICc(full_log, model2_log, null_log)
+MuMIn:: model.sel(full_log, model2_log, null_log)
+```
+
+
+
+We found that the blank model, inlcuding the blank blank blank predictors best predicted blank (model summary).
+
+```{r}
+summary(full_log)
+
+table <- tidy(full_log, conf.int = TRUE, exponentiate = TRUE) %>% 
+  # change the p-value numbers if they're really small
+  # change the estmaes, standard error, and t-tstatistics to round to ___ digits
+  # using mutate
+  # make it into a flextable
+  flextable() %>% 
+  # fit it to the viewer
+  autofit()
+
+table
+```
+
+```{r}
+#using ggpredict to backtransform estimates 
+model_pred <- ggpredict(full_log, terms = "species", back.transform = TRUE)
+
+plot(ggpredict(full_log, terms = "species", back.transform = TRUE), add.data = TRUE)
+
+plot(ggpredict(full_log, terms = "chlorophyll", back.transform = TRUE), add.data = TRUE)
+
+plot(ggpredict(full_log, terms = "sla", back.transform = TRUE), add.data = TRUE)
+
+model_pred
+
+```
