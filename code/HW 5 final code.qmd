@@ -17,6 +17,8 @@ Nick Momaney
 
 6/6/2023
 
+Github repository: [here](https://github.com/Nick-M52/ENVS-193DS_HW5)
+
 ## Homework 5 Introduction, Code, Methods, Results, & Bibliography
 
 ## -Introduction
