@@ -10,15 +10,24 @@ execute:
   message: false
   warning: false
 editor_options: 
-  chunk_output_type: console
+  chunk_output_type: inline
 ---
 
-## Homework 5 Code
+Nick Momaney
+
+6/6/2023
+
+## Homework 5 Introduction, Code, Methods, Results, & Bibliography
+
+## -Introduction
+
+*Sarracenia* are a family of pitcher plants whose leaves serve as traps that capture and digest small prey and insects (Freedman et al 2021). These plants are fascinating because carnivorous plants are very rare and unique. These plants are also important to ecosystems for their nutrient cycling and pest control. Understanding their biomass and the characteristics that affect it allows researchers to "create a framework for understanding physiological and evolutionary constraints in other highly specialized plant species" (Farnsworth and Ellison 2008). The *Sarracenia purpurea* have also been found to create an anti-herpes virus, which can be a non-pharmaceutical treatment for a disease that affects over 60% of the population (Kannan et al. 2020). The statistical analysis performed below addresses the question of what characteristics affect biomass. The hypothesis being tested is that the morphological, physiological, and taxonomic characteristics affect the biomass of the species. Specifically, this study is addressing a subset of the characteristics from the data collected by the researchers: subspecies, amount of food, specific leaf area, chlorophyll content of youngest leaf, mass-based light-saturated photosynthetic rate of youngest leaf, number of leaves and phyllodes, and the number of phyllodes.
+
+# Code (Statistical Analysis)
 
 ```{r}
 #install.packages("car")
 ```
-
 
 ```{r}
 library(tidyverse)
@@ -43,7 +52,6 @@ library(corrplot)
 library(AICcmodavg)
 library(GGally)
 ```
-
 
 ```{r}
 #reading in data table
@@ -92,9 +100,12 @@ corrplot(plant_cor,
 
 ```{r}
 #creating a plot of each variable compared against the others
-plant_subset %>% 
+plot <- plant_subset %>% 
   select(species:num_phylls) %>% 
   ggpairs()
+
+# Customize the appearance of the plot
+plot + theme_bw() + theme(text = element_text(size = 6))
 ```
 
 ```{r}
@@ -132,20 +143,18 @@ check_heteroscedasticity(full_log)
 #evaluate multicollinearity
 car:: vif(full_log)
 ```
- 
- we evaluated multicollinearity by calculating generalized variance inflation factor and determined that
- 
- 
- 
- Trying some more models:
- 
- what set of predictor variables best explains the response
- 
+
+we evaluated multicollinearity by calculating generalized variance inflation factor and determined that
+
+Trying some more models:
+
+what set of predictor variables best explains the response
+
 ```{r}
 #second model
 model2_log<- lm(log(totmass) ~ species, data= plant_subset)
 ```
- 
+
 ```{r}
 #check the plot
 plot(model2_log)
@@ -168,8 +177,6 @@ MuMIn::AICc(full_log, model2_log, null_log)
 MuMIn:: model.sel(full_log, model2_log, null_log)
 ```
 
-
-
 We found that the blank model, inlcuding the blank blank blank predictors best predicted blank (model summary).
 
 ```{r}
@@ -189,14 +196,129 @@ table
 
 ```{r}
 #using ggpredict to backtransform estimates 
-model_pred <- ggpredict(full_log, terms = "species", back.transform = TRUE)
+model_pred1 <- ggpredict(full_log, terms = "feedlevel", back.transform = TRUE)
+model_pred2 <- ggpredict(full_log, terms = "chlorophyll", back.transform = TRUE)
+model_pred3 <- ggpredict(full_log, terms = "num_lvs", back.transform = TRUE)
 
-plot(ggpredict(full_log, terms = "species", back.transform = TRUE), add.data = TRUE)
+plot(ggpredict(full_log, terms = "feedlevel", back.transform = TRUE), add.data = TRUE)
 
 plot(ggpredict(full_log, terms = "chlorophyll", back.transform = TRUE), add.data = TRUE)
 
-plot(ggpredict(full_log, terms = "sla", back.transform = TRUE), add.data = TRUE)
+plot(ggpredict(full_log, terms = "num_lvs", back.transform = TRUE), add.data = TRUE)
 
 model_pred
+model_pred2
+model_pred3
 
 ```
+
+# Methods
+
+The data on *Sarracenia* was collected by the researchers at Harvard to study the "Allometric relationships exist between maximal mass-based net photosynthetic rates, leaf mass per unit area, and foliar Nitrogen (N) and Phosphorus (P) content..." (Ellison et al. 2021). They wanted to see if the provided amount of food would affect the plants in their total biomass and the individual plant characteristics. The data on the plants (N=120 total plants) was observed and collected after the plants were fed varying amounts of food once a week for 7 weeks (Ellison et al. 2021). This data analysis was performed to see if the subspecies, amount of food, specific leaf area, chlorophyll content of youngest leaf, mass-based light-saturated photosynthetic rate of youngest leaf, number of leaves and phyllodes, and the number of phyllodes were good predictors of the total plant mass. The raw data was loaded into R and only the previously specified data columns were selected for analysis. After this, several different types of data analysis including linear regressions were performed to asses how the different sample characteristics predicted and related to the total mass.
+
+```{r}
+#missing data visualization
+gg_miss_var(plant)
+
+```
+
+This is a plot of the number of missing variables from the selected data columns that are used in the analysis. The plot shows that which columns have missing data and how many missing points. The columns with missing data had the missing rows of data removed.
+
+```{r}
+plant_cor<-plant_subset %>% 
+  select(feedlevel:num_phylls) %>% 
+  cor(method="pearson")
+corrplot(plant_cor,
+         # change the shape of what's in the cells
+         method = "ellipse",
+         addCoef.col = "black"
+         )
+
+```
+
+This graph shows the Pearson's correlation between all of the predictor variables, with a value of -1 being a perfect negative relationship and a value of 1 being a perfect positive relationship. The strongest positive relationship is between the specific leaf area and the above ground mass. The strongest negative relationships are between the specific leaf area and feed level, the number of leaves and the above ground mass, and the specific leaf area and the number of phyllodes. The stronger relationships can represent potential multicollinearity which may affect the usefulness of the regression model.
+
+```{r}
+  # Creating a plot of each variable compared against the others
+  plot <- plant_subset %>% 
+    select(species:num_phylls) %>% 
+    ggpairs()
+
+  # Customize the appearance of the plot
+ plot + theme_bw() + theme(text = element_text(size = 6))
+
+
+```
+
+This set of plots displays the relationships between all of the predictor variables for the total mass. Some of the plots just list the Pearson's correlation and others use histograms, line, and scatter plots. None of these plots show particularly strong relationships, similar to the Pearson's R correlation plot.
+
+```{r}
+null<- lm(totmass~1, data= plant_subset)
+full <- lm(totmass ~ species + feedlevel + sla + chlorophyll + amass + num_lvs + num_phylls, data = plant_subset)
+null
+full
+```
+
+In the null model, the intercept is estimated to be 6.022, the average value of the response variable "totmass" when no predictor variables are considered. In the full model, which includes multiple predictor variables, the coefficients represent the effects of these variables on the response variable.
+
+```{r}
+par(mfrow= c(2,2))
+plot(null)
+par(mfrow= c(2,2))
+plot(full)
+```
+
+The null model shows the average value of the response variable, not considering the predictors, (total mass), at roughly six. The full model shows 4 plots that help to check the relationship between the predictors and response for normality of residuals and homoscedasticity. The full model shows that the linear regression has normally distributed residuals and follows homoscedasticity. This shows that the predictors are good predictors of the response. However, the Shapiro-Wilks test states non-normality of the data. Log transformations were performed on the full and null models to see if they could achieve better normality of residuals and better homoscedasticity. This can help to better understand relationships within the data set if they are not perfectly linear.
+
+```{r}
+#Model construction of log transformed Linear Regressions for species, chlorphyll, and number of leaves.
+model_pred1 <- ggpredict(full_log, terms = "feedlevel", back.transform = TRUE)
+model_pred2 <- ggpredict(full_log, terms = "chlorophyll", back.transform = TRUE)
+model_pred3 <- ggpredict(full_log, terms = "num_lvs", back.transform = TRUE)
+
+plot(ggpredict(full_log, terms = "feedlevel", back.transform = TRUE), add.data = TRUE)
+
+plot(ggpredict(full_log, terms = "chlorophyll", back.transform = TRUE), add.data = TRUE)
+
+plot(ggpredict(full_log, terms = "num_lvs", back.transform = TRUE), add.data = TRUE)
+
+model_pred1
+model_pred2
+model_pred3
+
+```
+
+These three models were chosen because these predictors had the highest weight in predicting the total mass and the "full_log" model had the lowest AICc value, meaning it was the best model of the predictors for this data set. The best predictor of total mass was the subspecies, however, this does not inherently offer any value about how plant characteristics or environmental characteristics affect the mass. It appears that the feed level was the best predictor, because the actual total mass data falls closet to the trend line or within the confidence interval.
+
+```{r}
+vif_values <- vif(full_log)
+vif_values
+```
+
+The variance inflation factor check shows that feed level has the lowest degree of multicollinearity, besides the subspecies category. This means that this is likely the best predictor of total mass, or at least the relationship that can be the best statistically proven.
+
+# Results
+
+The best model for this relationship is the log transformed linear regression model because it has the lowest degree of multicollinearity. This model also meets the assumptions of normality of residuals and homoscedasticity.
+
+```{r}
+full_log
+```
+
+This model describes the relationship between the log transformed linear regressions for all of the predictors chosen for study in this analysis.
+
+```{r}
+plot(ggpredict(full_log, terms = "feedlevel", back.transform = TRUE), add.data = TRUE)
+```
+
+This graph shows the predictions of the total plant mass as a response to the feed level with the black line and the confidence interval for the response with the grey area. The actual total mass data is represented by the points on the graph. This graph visually compares the actual data with the prediction model.
+
+Biologically speaking, this model states that as the feed level increases the actual total mass of the plants is expected to decrease. However, because it is a logarithmic relationship the magnitude of the decrease becomes smaller as the feed level increases.
+
+# Bibliography
+
+-    Farnsworth, Elizabeth J., and Aaron M. Ellison. \"Prey Availability Directly Affects Physiology, Growth, Nutrient Allocation and Scaling Relationships among Leaf Traits in 10 Carnivorous Plant Species.\" *Journal of Ecology*, vol. 0, no. 0, 2007, https://doi.org/10.1111/j.1365-2745.2007.01313.x.
+
+-    Freedman, Zachary B. et al. "Environment--host--microbial Interactions Shape the Sarracenia Purpurea Microbiome at the Continental Scale." Ecology (Durham) 102.5 (2021): e03308--n/a. Web.
+
+-    Kannan, Latha et al. "Anti-Herpes Virus Activity of the Carnivorous Botanical, Sarracenia Purpurea." Scientific reports 10.1 (2020): 18953--. Web.
