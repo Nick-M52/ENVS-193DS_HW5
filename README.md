@@ -36,4 +36,4 @@ NA is used to record missing data, these data were removed in the code for the p
 
 ### Code- 
 
-The github repository, containing all the code and data for this project, is available [here](https://github.com/Nick-M52/ENVS-193DS_HW5/tree/main).
+The github repository, containing all the code and data for this project, is available [here](https://github.com/Nick-M52/ENVS-193DS_HW5/tree/main). The html code and related discussion is available [here](https://github.com/Nick-M52/ENVS-193DS_HW5/blob/2d656c26f35a73501cd0547fc9d1d546026ccbee/code/HW%205%20final%20code.html).
