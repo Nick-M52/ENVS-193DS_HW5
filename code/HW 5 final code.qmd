@@ -208,7 +208,7 @@ plot(ggpredict(full_log, terms = "chlorophyll", back.transform = TRUE), add.data
 
 plot(ggpredict(full_log, terms = "num_lvs", back.transform = TRUE), add.data = TRUE)
 
-model_pred
+model_pred1
 model_pred2
 model_pred3
 
